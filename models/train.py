@@ -12,6 +12,8 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 num_epochs = 10
+losses = []
+
 for epoch in range(num_epochs):
     model.train()
     running_loss = 0.0
@@ -29,7 +31,15 @@ for epoch in range(num_epochs):
 
         running_loss += loss.item()
 
-    print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {running_loss / len(train_loader):.4f}")
+    avg_loss = running_loss / len(train_loader)
+    losses.append(avg_loss)
+    print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {avg_loss:.4f}")
 
 torch.save(model.state_dict(), "model.pth")
+
+with open("losses.txt", "w") as f:
+    for loss in losses:
+        f.write(f"{loss}\n")
+
 print("Training complete! Model saved as model.pth.")
+print("Losses saved to losses.txt.")

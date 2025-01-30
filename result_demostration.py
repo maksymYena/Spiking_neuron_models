@@ -11,7 +11,7 @@ model = DomainAdaptationModel().to(device)
 model.load_state_dict(torch.load("model.pth", map_location=device, weights_only=True))
 model.eval()
 
-with open("losses.txt", "r") as f:
+with open("models/losses.txt", "r") as f:
     losses = [float(line.strip()) for line in f.readlines()]
 
 epochs = list(range(1, len(losses) + 1))

@@ -1,9 +1,10 @@
+import json
+import os
+
 import torch
 from PIL import Image
-import os
-import json
-from torchvision import transforms
 from torch.utils.data import Dataset
+from torchvision import transforms
 
 
 class HazardDataset(Dataset):

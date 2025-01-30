@@ -13,7 +13,7 @@ class ModelTester:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = models.resnet50(pretrained=True)
 
-        # Загрузка модели с безопасностью
+
         self.model.load_state_dict(torch.load(model_path, map_location=self.device, weights_only=True))
         self.model.eval()
 
@@ -43,12 +43,12 @@ class ModelTester:
             print("Error: Incorrect annotation format.")
             return None
 
-        # Подсчет количества объектов
+
         hazardous_count = sum(1 for ann in data["annotations"] if ann["category_id"] == 1)
         non_hazardous_count = len(data["images"]) - hazardous_count
         print(f"Hazardous Objects: {hazardous_count}, Non-Hazardous Objects: {non_hazardous_count}")
 
-        # Генерация меток
+
         true_labels = {img["file_name"]: 1 if any(
             ann["image_id"] == img["id"] and ann["category_id"] == 1 for ann in data["annotations"]
         ) else 0 for img in data["images"]}
@@ -76,7 +76,6 @@ class ModelTester:
         return label, confidence
 
 
-# Запуск тестирования
 tester = ModelTester("./model.pth", "./hazard_detection_data/drone/images", threshold=0.5)
 results_df = tester.test_model()
 tester.evaluate_metrics(results_df, "./hazard_detection_data/drone/annotations/all_annotations.json")

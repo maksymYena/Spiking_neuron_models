@@ -6,8 +6,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 
 from dataset.dataset import HazardDataset
-from model.model import DomainAdaptationModel
-from model.train import train_model
+from models.model import DomainAdaptationModel
 from torchvision import transforms
 
 # Paths and Parameters

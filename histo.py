@@ -1,11 +1,12 @@
 import os
+
 import matplotlib.pyplot as plt
-import numpy as np
 import torch
 import torchvision.transforms as transforms
 from PIL import Image
 
 from models.model import DomainAdaptationModel
+
 
 class ImageAndHistogramViewer:
     def __init__(self, model_path, image_folder):
@@ -73,6 +74,7 @@ class ImageAndHistogramViewer:
 
         plt.tight_layout()
         plt.show()
+
 
 if __name__ == "__main__":
     viewer = ImageAndHistogramViewer("model.pth", "./hazard_detection_data/drone/images")

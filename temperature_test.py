@@ -6,6 +6,7 @@ from PIL import Image
 
 from models.model import DomainAdaptationModel
 
+
 class NoiseRobustnessTester:
     def __init__(self, model_path, image_path):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -64,6 +65,6 @@ class NoiseRobustnessTester:
 
         plt.show()
 
-# Запуск теста для одного изображения
+
 tester = NoiseRobustnessTester("model.pth", "./hazard_detection_data/drone/images/IMG_2132.jpeg")
 tester.test_noise_robustness()

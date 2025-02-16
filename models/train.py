@@ -11,7 +11,6 @@ from models.model import DomainAdaptationModel
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = DomainAdaptationModel().to(device)
 
-# Вычисляем и выводим распределение меток в обучающем наборе
 train_labels = []
 for _, labels in train_loader:
     train_labels.extend(labels.cpu().numpy())
@@ -21,7 +20,6 @@ print("Class distribution in dataset:", Counter([label for _, label in train_loa
 
 total_samples = sum(class_counts.values())
 num_classes = 2
-# Поскольку в датасете метки уже преобразованы (0 и 1), используем ключи 0 и 1
 class_weights = [total_samples / class_counts.get(i, 1) for i in range(num_classes)]
 class_weights = torch.tensor(class_weights, dtype=torch.float, device=device)
 
@@ -59,9 +57,6 @@ with open("losses.txt", "w") as f:
 print("Training complete! Model saved as model.pth.")
 print("Losses saved to losses.txt.")
 
-# ============================
-# Оценка модели на тестовом наборе
-# ============================
 model.eval()
 test_loss = 0.0
 all_preds = []
@@ -80,16 +75,13 @@ with torch.no_grad():
 test_loss /= len(test_loader)
 print(f"\nTest Loss: {test_loss:.4f}")
 
-# Вычисляем accuracy
 accuracy = accuracy_score(all_labels, all_preds)
 print(f"Test Accuracy: {accuracy:.4f}")
 
-# Выводим матрицу ошибок
 cm = confusion_matrix(all_labels, all_preds)
 print("Confusion Matrix:")
 print(cm)
 
-# Выводим подробный отчёт по классам
 target_names = ["hazardous", "non_hazardous"]
 report = classification_report(all_labels, all_preds, target_names=target_names)
 print("Classification Report:")

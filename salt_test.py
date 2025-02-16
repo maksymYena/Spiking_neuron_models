@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import torchvision.transforms as transforms
 from PIL import Image, ImageFilter, ImageEnhance
+
 from models.model import DomainAdaptationModel
 
 
@@ -20,25 +21,20 @@ class NoiseRobustnessTester:
         ])
 
     def add_noise(self, image, noise_level):
-        """ Добавляет различные искажения """
         image = image.copy()
 
-        # Гауссовский шум
         if np.random.rand() > 0.5:
             noise = np.random.normal(0, noise_level * 50, np.array(image).shape)
             image = np.clip(np.array(image) + noise, 0, 255).astype(np.uint8)
             image = Image.fromarray(image)
 
-        # Размытие
         if np.random.rand() > 0.5:
             image = image.filter(ImageFilter.GaussianBlur(radius=noise_level * 5))
 
-        # JPEG-артефакты
         if np.random.rand() > 0.5:
             image.save("temp.jpg", "JPEG", quality=int(100 - noise_level * 90))
             image = Image.open("temp.jpg")
 
-        # Контрастность
         if np.random.rand() > 0.5:
             contrast = 1.0 - noise_level
             enhancer = ImageEnhance.Contrast(image)
@@ -48,7 +44,7 @@ class NoiseRobustnessTester:
 
     def test_noise_robustness(self):
         original_image = Image.open(self.image_path).convert("RGB")
-        noise_levels = np.arange(0, 1.05, 0.1)  # От 0% до 100% с шагом 10%
+        noise_levels = np.arange(0, 1.05, 0.1)
         confidences = []
 
         plt.figure(figsize=(12, 10))
@@ -80,7 +76,6 @@ class NoiseRobustnessTester:
             plt.title("Model Confidence vs. Noise Level")
             plt.grid(True)
 
-            # Добавляем гистограмму распределения уверенности
             plt.subplot(2, 1, 2)
             plt.hist(confidences, bins=6, alpha=0.7, color="blue", edgecolor="black")
             plt.xlabel("Model Confidence")
@@ -92,6 +87,5 @@ class NoiseRobustnessTester:
         plt.show()
 
 
-# Запуск теста
 tester = NoiseRobustnessTester("model.pth", "./hazard_detection_data/drone/images/IMG_2132.jpeg")
 tester.test_noise_robustness()

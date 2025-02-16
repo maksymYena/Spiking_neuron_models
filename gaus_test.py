@@ -61,6 +61,5 @@ class NoiseRobustnessTester:
         plt.show()
 
 
-# Запуск теста
 tester = NoiseRobustnessTester("model.pth", "./hazard_detection_data/drone/images/IMG_2132.jpeg")
 tester.test_noise_robustness()

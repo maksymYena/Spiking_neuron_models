@@ -76,6 +76,7 @@ class ModelTester:
         return label, confidence
 
 
+
 tester = ModelTester("./model.pth", "./hazard_detection_data/drone/images", threshold=0.5)
 results_df = tester.test_model()
 tester.evaluate_metrics(results_df, "./hazard_detection_data/drone/annotations/all_annotations.json")

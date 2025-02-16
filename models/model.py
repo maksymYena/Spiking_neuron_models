@@ -5,7 +5,7 @@ from torchvision.models import efficientnet_b0
 class DomainAdaptationModel(nn.Module):
     def __init__(self):
         super(DomainAdaptationModel, self).__init__()
-        self.feature_extractor = efficientnet_b0(weights="IMAGENET1K_V1")
+        self.feature_extractor = efficientnet_b0(pretrained=True)
         feature_size = self.feature_extractor.classifier[1].in_features
         self.feature_extractor.classifier[1] = nn.Identity()
 

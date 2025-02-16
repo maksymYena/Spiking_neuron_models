@@ -3,7 +3,6 @@ import numpy as np
 import torch
 import torchvision.transforms as transforms
 from PIL import Image, ImageFilter, ImageEnhance
-
 from models.model import DomainAdaptationModel
 
 
@@ -52,7 +51,8 @@ class NoiseRobustnessTester:
         noise_levels = np.arange(0, 1.05, 0.1)  # От 0% до 100% с шагом 10%
         confidences = []
 
-        plt.figure(figsize=(12, 6))
+        plt.figure(figsize=(12, 10))
+
         for noise_level in noise_levels:
             noisy_image = self.add_noise(original_image, noise_level)
             transformed_image = self.transform(noisy_image).unsqueeze(0).to(self.device)
@@ -63,23 +63,29 @@ class NoiseRobustnessTester:
                 predicted_class = np.argmax(probabilities)
                 confidence = np.max(probabilities)
 
-            # Логирование предсказаний
-            print(f"Noise: {int(noise_level * 100)}% | Class: {predicted_class} | Confidence: {confidence:.4f} | Probabilities: {probabilities}")
+            print(f"Noise: {int(noise_level * 100)}% | Class: {predicted_class} | Confidence: {confidence:.4f}")
 
             confidences.append(confidence)
 
             plt.clf()
-            plt.subplot(1, 2, 1)
+            plt.subplot(2, 2, 1)
             plt.imshow(noisy_image)
             plt.title(f"Noise: {int(noise_level * 100)}% | Confidence: {confidence:.2f}")
             plt.axis("off")
 
-            plt.subplot(1, 2, 2)
+            plt.subplot(2, 2, 2)
             plt.plot(noise_levels[:len(confidences)] * 100, confidences, marker="o", linestyle="-", color="b")
             plt.xlabel("Noise Level (%)")
             plt.ylabel("Model Confidence")
             plt.title("Model Confidence vs. Noise Level")
             plt.grid(True)
+
+            # Добавляем гистограмму распределения уверенности
+            plt.subplot(2, 1, 2)
+            plt.hist(confidences, bins=6, alpha=0.7, color="blue", edgecolor="black")
+            plt.xlabel("Model Confidence")
+            plt.ylabel("Frequency of Occurrence")
+            plt.title("Histogram of Model Confidence")
 
             plt.pause(0.5)
 

@@ -2,6 +2,7 @@ import json
 import os
 from collections import Counter
 
+import torch
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -16,7 +17,11 @@ annotations_file = os.path.join(BASE_DIR, "../hazard_detection_data/drone/annota
 # Трансформации для изображений
 transforms_pipeline = transforms.Compose([
     transforms.Resize((256, 256)),
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomRotation(10),
+    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
     transforms.ToTensor(),
+    transforms.Lambda(lambda x: x + torch.randn(x.size()) * 0.05),
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
@@ -45,7 +50,16 @@ dataset = HazardDataset(images_folder, annotations_file, transform=transforms_pi
 train_dataset = [dataset[i] for i in range(len(dataset)) if dataset.image_ids[i] in train_ids]
 test_dataset = [dataset[i] for i in range(len(dataset)) if dataset.image_ids[i] in test_ids]
 
-train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+from torch.utils.data import WeightedRandomSampler
+
+# Предполагается, что train_dataset уже содержит метки в виде 0 и 1
+train_labels = [label for _, label in train_dataset]
+class_sample_counts = [train_labels.count(0), train_labels.count(1)]
+weights = 1. / torch.tensor(class_sample_counts, dtype=torch.float)
+samples_weight = torch.tensor([weights[label] for label in train_labels])
+sampler = WeightedRandomSampler(samples_weight, num_samples=len(samples_weight), replacement=True)
+
+train_loader = DataLoader(train_dataset, batch_size=16, sampler=sampler)
 test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
 
 train_labels = [label for _, label in train_dataset]

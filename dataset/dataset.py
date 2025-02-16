@@ -38,28 +38,25 @@ class HazardDataset(Dataset):
         image_path = os.path.join(self.images_folder, image_filename)
 
         if not os.path.exists(image_path):
-            return torch.zeros((3, 256, 256)), 0
+            raise FileNotFoundError(f"Изображение не найдено: {image_path}")
 
         image = Image.open(image_path).convert("RGB")
-
         if self.transform:
             try:
-                for i, t in enumerate(self.transform.transforms):
-                    image = t(image)
+                image = self.transform(image)
             except Exception as e:
-                print(f"ERROR applying transform {i + 1}: {t}")
-                print(f"Exception: {e}")
-                print(f"Image type before transform: {type(image)}, Size: {image.size}")
-
+                print("Ошибка при применении трансформаций:", e)
                 image = transforms.Resize((256, 256))(image)
                 image = transforms.ToTensor()(image)
-
         else:
             image = transforms.Resize((256, 256))(image)
             image = transforms.ToTensor()(image)
 
-        if not isinstance(image, torch.Tensor):
-            raise TypeError(f"Expected image to be a Tensor, but got {type(image)}")
-
-        label = next((ann["category_id"] for ann in self.annotations if ann["image_id"] == image_id), 0)
+        # В __getitem__:
+        label = next((ann["category_id"] for ann in self.annotations if ann["image_id"] == image_id), None)
+        if label is None:
+            raise ValueError(f"Нет аннотации для image_id {image_id}")
+        # Преобразуем: 1 -> 0, 2 -> 1
+        label = label - 1
         return image, label
+

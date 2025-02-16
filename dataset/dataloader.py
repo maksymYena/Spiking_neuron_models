@@ -1,6 +1,7 @@
 import json
 import os
 from collections import Counter
+import random
 
 import torch
 from sklearn.model_selection import train_test_split
@@ -12,7 +13,7 @@ from dataset.dataset import HazardDataset
 # Пути к изображениям и аннотациям
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 images_folder = os.path.join(BASE_DIR, "../hazard_detection_data/drone/images/")
-annotations_file = os.path.join(BASE_DIR, "../hazard_detection_data/drone/annotations/all_annotations.json")
+annotations_file = os.path.join(BASE_DIR, "../hazard_detection_data/drone/annotations/all_annotations_modified.json")
 
 # Трансформации для изображений
 transforms_pipeline = transforms.Compose([
@@ -21,7 +22,7 @@ transforms_pipeline = transforms.Compose([
     transforms.RandomRotation(10),
     transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
     transforms.ToTensor(),
-    transforms.Lambda(lambda x: x + torch.randn(x.size()) * 0.05),
+    transforms.Lambda(lambda x: torch.clamp(x + torch.randn_like(x) * random.uniform(0, 0.1), 0, 1)),
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
@@ -37,8 +38,8 @@ hazardous_ids = [img["id"] for img in data["images"] if image_id_to_category.get
 non_hazardous_ids = [img["id"] for img in data["images"] if image_id_to_category.get(img["id"], 0) == 2]
 
 # Разделяем train/test сбалансированно (10% в тест)
-hazardous_train, hazardous_test = train_test_split(hazardous_ids, test_size=0.1, random_state=42)
-non_hazardous_train, non_hazardous_test = train_test_split(non_hazardous_ids, test_size=0.1, random_state=42)
+hazardous_train, hazardous_test = train_test_split(hazardous_ids, test_size=1, random_state=42)
+non_hazardous_train, non_hazardous_test = train_test_split(non_hazardous_ids, test_size=1, random_state=42)
 
 # Объединяем train и test
 train_ids = set(hazardous_train + non_hazardous_train)
